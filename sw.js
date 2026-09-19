@@ -1,4 +1,4 @@
-const CACHE = "webshot-v4";
+const CACHE = "webshot-v5";
 const ASSETS = [
   "./",
   "./index.html",

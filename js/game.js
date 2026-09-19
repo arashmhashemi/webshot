@@ -305,17 +305,16 @@
 
   function queueWave(n) {
     game.spawnQ = [];
-    const thugs = 3 + n;
-    const guns = Math.max(0, n - 1);
+    const thugs = 3 + Math.floor((n - 1) / 2);
+    const guns = n < 5 ? 0 : 1 + Math.floor((n - 5) / 3);
     for (let i = 0; i < thugs; i++) game.spawnQ.push("thug");
     for (let i = 0; i < guns; i++) game.spawnQ.push("gunner");
-    // shuffle
     for (let i = game.spawnQ.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [game.spawnQ[i], game.spawnQ[j]] = [game.spawnQ[j], game.spawnQ[i]];
     }
     game.remaining = game.spawnQ.length;
-    game.spawnT = 0.4;
+    game.spawnT = n === 1 ? 1.0 : 2.4;
   }
 
   let spawnSide = 1;
@@ -325,8 +324,8 @@
     const x = camX + (side < 0 ? -80 : W + 80);
     const spec =
       type === "gunner"
-        ? { w: 92, h: 150, speed: 95, hp: 1, range: 360 }
-        : { w: 88, h: 148, speed: 130 + game.wave * 8, hp: 1, range: 58 };
+        ? { w: 92, h: 150, speed: 80, hp: 1, range: 360 }
+        : { w: 88, h: 148, speed: 95 + Math.max(0, game.wave - 4) * 5, hp: 1, range: 58 };
     game.enemies.push({
       type,
       x,
@@ -341,8 +340,8 @@
       facing: side < 0 ? 1 : -1,
       state: "alive",
       wrapT: 0,
-      atkCd: rand(0.4, 1.2),
-      shootCd: rand(0.6, 1.6),
+      atkCd: rand(0.8, 1.6),
+      shootCd: rand(1.6, 2.4),
       bob: Math.random() * 10,
     });
   }
@@ -688,7 +687,7 @@
       game.spawnT -= dt;
       if (game.spawnT <= 0) {
         spawnEnemy(game.spawnQ.shift());
-        game.spawnT = Math.max(0.35, 1.05 - game.wave * 0.06);
+        game.spawnT = Math.max(0.9, 1.9 - Math.max(0, game.wave - 3) * 0.08);
       }
     } else if (game.remaining <= 0 && game.enemies.every((e) => e.state !== "alive")) {
       game.wave += 1;
@@ -875,11 +874,11 @@
           game.bullets.push({
             x: ox,
             y: oy,
-            vx: (bx / d) * (340 + game.wave * 12),
-            vy: (by / d) * (340 + game.wave * 12),
+            vx: (bx / d) * (240 + Math.max(0, game.wave - 5) * 8),
+            vy: (by / d) * (240 + Math.max(0, game.wave - 5) * 8),
             life: 2.4,
           });
-          en.shootCd = Math.max(0.85, 1.7 - game.wave * 0.08);
+          en.shootCd = Math.max(1.35, 2.5 - Math.max(0, game.wave - 5) * 0.08);
         }
       }
     }

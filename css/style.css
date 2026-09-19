@@ -52,8 +52,15 @@ canvas {
   pointer-events: none;
   display: flex;
   justify-content: flex-start;
+  align-items: flex-start;
   padding: 18px 22px;
   z-index: 2;
+}
+
+/* Old HUD score/wave cards stretched into full-height bars. Keep them gone. */
+#stats,
+.stat {
+  display: none !important;
 }
 
 #hearts {

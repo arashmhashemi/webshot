@@ -1,9 +1,10 @@
 (() => {
   "use strict";
 
-  const W = 1280;
-  const H = 720;
-  const GROUND = 578;
+  let W = 1280;
+  let H = 720;
+  let GROUND = 578;
+  let pixelRatio = 1;
   const GRAVITY = 2600;
 
   const canvas = document.getElementById("game");
@@ -36,6 +37,26 @@
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lerp = (a, b, t) => a + (b - a) * t;
   const sign = (v) => (v < 0 ? -1 : v > 0 ? 1 : 0);
+
+  function layout() {
+    const prevGround = GROUND;
+    const cssW = Math.max(320, window.innerWidth);
+    const cssH = Math.max(240, window.innerHeight);
+    pixelRatio = Math.min(window.devicePixelRatio || 1, 2.5);
+    canvas.width = Math.round(cssW * pixelRatio);
+    canvas.height = Math.round(cssH * pixelRatio);
+    canvas.style.width = `${cssW}px`;
+    canvas.style.height = `${cssH}px`;
+    W = cssW;
+    H = cssH;
+    GROUND = Math.round(H - clamp(H * 0.14, 72, 150));
+    if (player && (player.onGround || Math.abs(player.y - prevGround) < 4)) player.y = GROUND;
+    if (game) {
+      for (const en of game.enemies) {
+        if (Math.abs(en.y - prevGround) < 4) en.y = GROUND;
+      }
+    }
+  }
 
   function loadImage(src) {
     return new Promise((resolve, reject) => {
@@ -204,7 +225,7 @@
 
   function resetPlayer() {
     Object.assign(player, {
-      x: 240,
+      x: Math.max(80, W * 0.22),
       y: GROUND,
       vx: 0,
       vy: 0,
@@ -247,7 +268,16 @@
     }
   }
 
+  function goImmersive() {
+    const root = document.documentElement;
+    if (!document.fullscreenElement && root.requestFullscreen) {
+      root.requestFullscreen({ navigationUI: "hide" }).catch(() => {});
+    }
+  }
+
   function startGame() {
+    goImmersive();
+    layout();
     game.score = 0;
     game.wave = 1;
     game.combo = 0;
@@ -260,7 +290,7 @@
     game.particles = [];
     seedProps();
     resetPlayer();
-    camX = player.x - 420;
+    camX = player.x - W * 0.38;
     state = "playing";
     titleEl.classList.add("hidden");
     overEl.classList.add("hidden");
@@ -417,9 +447,12 @@
   });
 
   function isTouch() {
-    return matchMedia("(pointer: coarse)").matches || "ontouchstart" in window || window.innerWidth < 720;
+    return matchMedia("(pointer: coarse)").matches || "ontouchstart" in window || window.innerWidth < 900;
   }
-  if (isTouch()) touchEl.classList.remove("hidden");
+  function syncTouch() {
+    touchEl.classList.toggle("hidden", !isTouch());
+  }
+  syncTouch();
   touchEl.addEventListener("pointerdown", (e) => {
     const dir = e.target.closest(".pad")?.dataset.dir;
     if (!dir) return;
@@ -438,6 +471,7 @@
   canvas.addEventListener(
     "touchstart",
     (e) => {
+      e.preventDefault();
       if (state !== "playing") return;
       const t = e.changedTouches[0];
       const p = canvasPoint(t);
@@ -446,21 +480,23 @@
       mouse.down = true;
       tryShoot();
     },
-    { passive: true }
+    { passive: false }
   );
   canvas.addEventListener(
     "touchmove",
     (e) => {
+      e.preventDefault();
       const t = e.changedTouches[0];
       const p = canvasPoint(t);
       mouse.x = p.x;
       mouse.y = p.y;
     },
-    { passive: true }
+    { passive: false }
   );
-  canvas.addEventListener("touchend", () => {
+  canvas.addEventListener("touchend", (e) => {
+    e.preventDefault();
     mouse.down = false;
-  });
+  }, { passive: false });
 
   function pause() {
     if (state !== "playing") return;
@@ -887,7 +923,7 @@
   function draw() {
     const sx = (Math.random() - 0.5) * shake;
     const sy = (Math.random() - 0.5) * shake;
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     ctx.clearRect(0, 0, W, H);
 
     // sky / city
@@ -1121,8 +1157,8 @@
     if (state === "title") {
       // idle attract
       time += dt;
-      camX = lerp(camX, 80, 0.02);
-      player.x = 280;
+      camX = lerp(camX, Math.max(0, W * 0.06), 0.02);
+      player.x = Math.max(80, W * 0.28);
       player.y = GROUND;
       player.facing = 1;
       player.run += dt * 2;
@@ -1162,8 +1198,48 @@
     },
   };
 
+  document.addEventListener(
+    "touchmove",
+    (e) => {
+      e.preventDefault();
+    },
+    { passive: false }
+  );
+
+  const installBtn = document.getElementById("installBtn");
+  let deferredInstall = null;
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredInstall = e;
+    installBtn.classList.remove("hidden");
+  });
+  installBtn.addEventListener("click", async () => {
+    if (!deferredInstall) return;
+    deferredInstall.prompt();
+    await deferredInstall.userChoice;
+    deferredInstall = null;
+    installBtn.classList.add("hidden");
+  });
+  if (window.matchMedia("(display-mode: standalone), (display-mode: fullscreen)").matches) {
+    installBtn.classList.add("hidden");
+  }
+
+  window.addEventListener("resize", () => {
+    layout();
+    syncTouch();
+  });
+  window.addEventListener("orientationchange", () => setTimeout(layout, 80));
+  if (window.visualViewport) {
+    visualViewport.addEventListener("resize", layout);
+  }
+
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  }
+
   loadAssets()
     .then(() => {
+      layout();
       audio = makeAudio();
       seedProps();
       last = performance.now();

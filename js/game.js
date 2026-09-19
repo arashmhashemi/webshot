@@ -10,10 +10,7 @@
   const ctx = canvas.getContext("2d");
   const hud = document.getElementById("hud");
   const heartsEl = document.getElementById("hearts");
-  const scoreEl = document.getElementById("score");
-  const waveEl = document.getElementById("wave");
-  const comboEl = document.getElementById("combo");
-  const comboWrap = document.getElementById("comboWrap");
+
   const bannerEl = document.getElementById("banner");
   const titleEl = document.getElementById("title");
   const pauseEl = document.getElementById("pause");
@@ -271,7 +268,6 @@
     hud.classList.remove("hidden");
     queueWave(1);
     renderHearts();
-    updateHud();
     audio.resume();
     audio.startMusic();
     showBanner("WAVE 1");
@@ -290,7 +286,6 @@
     }
     game.remaining = game.spawnQ.length;
     game.spawnT = 0.4;
-    waveEl.textContent = String(n);
   }
 
   let spawnSide = 1;
@@ -331,12 +326,6 @@
       if (i >= player.hp) img.classList.add("gone");
       heartsEl.appendChild(img);
     }
-  }
-
-  function updateHud() {
-    scoreEl.textContent = String(game.score);
-    comboEl.textContent = `x${game.combo}`;
-    comboWrap.classList.toggle("show", game.combo >= 1);
   }
 
   function showBanner(text) {
@@ -627,7 +616,6 @@
     shake = Math.min(18, shake + 6);
     hitstop = 0.045;
     audio.wrap();
-    updateHud();
   }
 
   function aabb(ax, ay, aw, ah, bx, by, bw, bh) {
@@ -657,7 +645,6 @@
     game.comboT -= dt;
     if (game.comboT <= 0) {
       game.combo = 0;
-      updateHud();
     }
 
     // spawn
@@ -790,7 +777,6 @@
             burst(b.x, b.y, 0.4);
             game.score += 25;
             floater(b.x, b.y, "+25", "#fff");
-            updateHud();
             hit = true;
             break;
           }

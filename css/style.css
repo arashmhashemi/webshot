@@ -51,7 +51,7 @@ canvas {
   inset: 0;
   pointer-events: none;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 18px 22px;
   z-index: 2;
 }
@@ -71,32 +71,6 @@ canvas {
   opacity: 0.22;
   filter: grayscale(1) drop-shadow(0 2px 0 #000);
 }
-
-#stats { display: flex; gap: 18px; }
-.stat {
-  background: rgba(7, 16, 31, 0.72);
-  border: 3px solid #111;
-  border-bottom-width: 5px;
-  padding: 6px 14px 4px;
-  min-width: 92px;
-  text-align: center;
-  box-shadow: 0 0 0 2px rgba(255,255,255,0.06);
-}
-.stat .label {
-  display: block;
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  color: var(--cyan);
-}
-.stat span:last-child {
-  font-family: "Bangers", Impact, sans-serif;
-  font-size: 28px;
-  line-height: 1.1;
-  color: #fff;
-}
-.stat.combo { opacity: 0; transform: scale(0.9); transition: 0.15s ease; }
-.stat.combo.show { opacity: 1; transform: scale(1); }
-.stat.combo span:last-child { color: #ffd84a; }
 
 #banner {
   position: absolute;
@@ -237,9 +211,6 @@ kbd {
 #touch .pad:active { background: rgba(227, 28, 37, 0.55); }
 
 @media (max-width: 720px) {
-  #stats { gap: 8px; }
-  .stat { min-width: 70px; padding: 4px 8px; }
-  .stat span:last-child { font-size: 20px; }
   #hearts img { width: 28px; height: 24px; }
   h1 { font-size: 58px; }
   h2 { font-size: 42px; }

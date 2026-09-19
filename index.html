@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>WEBSHOT</title>
+  <link rel="icon" href="favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="frame">
+    <div id="stage">
+      <canvas id="game" width="1280" height="720"></canvas>
+
+      <div id="hud" class="hidden">
+        <div id="hearts"></div>
+        <div id="stats">
+          <div class="stat"><span class="label">SCORE</span><span id="score">0</span></div>
+          <div class="stat"><span class="label">WAVE</span><span id="wave">1</span></div>
+          <div class="stat combo" id="comboWrap"><span class="label">COMBO</span><span id="combo">x1</span></div>
+        </div>
+      </div>
+
+      <div id="banner" class="hidden"></div>
+
+      <div id="touch" class="hidden">
+        <div class="pad" data-dir="left">◀</div>
+        <div class="pad" data-dir="jump">▲</div>
+        <div class="pad" data-dir="right">▶</div>
+      </div>
+    </div>
+
+    <div id="title" class="overlay">
+      <div class="title-card">
+        <p class="kicker">Night over the rooftops</p>
+        <h1>WEBSHOT</h1>
+        <p class="tag">Shoot webs. Wrap the bad guys. Save the city.</p>
+        <button id="playBtn" type="button" aria-label="Play">
+          <img src="assets/play.png" alt="" />
+          <span>PLAY</span>
+        </button>
+        <ul class="controls">
+          <li><kbd>A</kbd><kbd>D</kbd> or arrows to move</li>
+          <li><kbd>SPACE</kbd> / <kbd>W</kbd> jump · double jump</li>
+          <li><b>Mouse</b> aim · <b>Left click</b> shoot web</li>
+          <li><b>Hold right click</b> (aim up) to swing</li>
+        </ul>
+      </div>
+    </div>
+
+    <div id="pause" class="overlay hidden">
+      <div class="title-card slim">
+        <h2>PAUSED</h2>
+        <p class="tag">Press <kbd>ESC</kbd> or click to keep swinging</p>
+        <button id="resumeBtn" type="button">RESUME</button>
+      </div>
+    </div>
+
+    <div id="over" class="overlay hidden">
+      <div class="title-card">
+        <p class="kicker">The city still needs you</p>
+        <h2>WEB'S DOWN</h2>
+        <p class="tag" id="overStats"></p>
+        <button id="retryBtn" type="button">TRY AGAIN</button>
+      </div>
+    </div>
+
+  </div>
+  <script src="js/game.js"></script>
+</body>
+</html>
